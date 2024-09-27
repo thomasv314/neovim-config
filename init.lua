@@ -282,22 +282,7 @@ require('lazy').setup({
         -- default whick-key.nvim defined Nerd Font icons, otherwise define a string table
         keys = vim.g.have_nerd_font and {} or {
           Up = '<Up> ',
-          Down = '<Down> ',
-          Left = '<Left> ',
-          Right = '<Right> ',
-          C = '<C-…> ',
-          M = '<M-…> ',
-          D = '<D-…> ',
-          S = '<S-…> ',
-          CR = '<CR> ',
-          Esc = '<Esc> ',
-          ScrollWheelDown = '<ScrollWheelDown> ',
-          ScrollWheelUp = '<ScrollWheelUp> ',
-          NL = '<NL> ',
-          BS = '<BS> ',
-          Space = '<Space> ',
-          Tab = '<Tab> ',
-          F1 = '<F1>',
+
           F2 = '<F2>',
           F3 = '<F3>',
           F4 = '<F4>',
@@ -829,13 +814,13 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    'gummesson/stereokai.vim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'stereokai'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -844,6 +829,34 @@ require('lazy').setup({
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+
+  -- NERDTree plugin
+  {
+    'preservim/nerdtree',
+    cmd = { 'NERDTreeToggle', 'NERDTreeFind' },
+    keys = {
+      { '<C-n>', ':NERDTreeToggle<CR>', desc = 'Toggle NERDTree' },
+      { '<C-t>', ':NERDTreeTabsToggle<CR>', desc = 'Toggle NERDTree Tabs' },
+    },
+    config = function()
+      -- NERDTree specific settings
+      vim.g.NERDTreeShowHidden = 1 -- Show hidden files
+      vim.g.NERDTreeMinimalUI = 1 -- Enable minimal UI
+      vim.g.NERDTreeIgnore = { '\\.pyc$', '\\~$' } -- Ignore some file patterns
+
+      -- Automatically close NERDTree if it's the last window
+      vim.cmd [[
+        autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+      ]]
+    end,
+  },
+
+  -- NERDTree Tabs plugin
+  {
+    'jistr/vim-nerdtree-tabs',
+    cmd = { 'NERDTreeTabsToggle' },
+    lazy = true,
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
