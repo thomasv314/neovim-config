@@ -309,6 +309,37 @@ require('lazy').setup({
       },
     },
   },
+  {
+    'nvim-tree/nvim-tree.lua',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      local function my_on_attach(bufnr)
+        local api = require 'nvim-tree.api'
+
+        local function opts(desc)
+          return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+        end
+
+        -- default mappings
+        api.config.mappings.default_on_attach(bufnr)
+        vim.g.nvim_tree_disable_window_picker = true
+        -- custom mappings
+        vim.keymap.set('n', 'gi', api.node.open.horizontal, opts 'Split Pane (Horizontal) THOMAS')
+        vim.keymap.set('n', 'gs', api.node.open.vertical, opts 'Split Pane (Vertical) THOMAS')
+      end
+
+      require('nvim-tree').setup {
+        on_attach = my_on_attach,
+        actions = {
+          open_file = {
+            window_picker = {
+              enable = false,
+            },
+          },
+        },
+      }
+    end,
+  },
 
   -- NOTE: Plugins can specify dependencies.
   --
@@ -600,9 +631,9 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
         --
-
+        csharp_ls = {},
         ruby_lsp = {},
         lua_ls = {
           -- cmd = {...},
@@ -684,6 +715,8 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
+        javascriptreact = { 'eslint_d' },
+        typescriptreact = { 'eslint_d' },
         lua = { 'stylua' },
         eruby = { 'erbformat' },
         ruby = { 'rubyfmt' },
@@ -692,6 +725,13 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      },
+      formatters = {
+        eslint_d = {
+          command = 'eslint_d',
+          stdin = true,
+          args = { '--fix', '--stdin', '--stdin-filename', '$FILENAME' },
+        },
       },
     },
   },
@@ -903,7 +943,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'hcl', 'terraform', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -969,3 +1009,5 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
+vim.opt.cursorline = false
