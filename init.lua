@@ -1011,3 +1011,7 @@ require('lazy').setup({
 -- vim: ts=2 sts=2 sw=2 et
 --
 vim.opt.cursorline = false
+vim.opt.foldmethod = 'expr'
+vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
+vim.opt.foldlevel = 99 -- Start with all folds open
+vim.opt.foldenable = true
