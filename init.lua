@@ -899,7 +899,15 @@ require('lazy').setup({
     cmd = { 'NERDTreeTabsToggle' },
     lazy = true,
   },
-
+  {
+    'stevearc/aerial.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+  },
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -1015,3 +1023,4 @@ vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldlevel = 99 -- Start with all folds open
 vim.opt.foldenable = true
+vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
