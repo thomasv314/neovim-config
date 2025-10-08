@@ -358,6 +358,11 @@ require('lazy').setup({
           },
         },
       }
+
+      -- Global toggle for nvim-tree
+      vim.keymap.set('n', '<leader>n', function()
+        require('nvim-tree.api').tree.toggle { focus = true }
+      end, { desc = 'Toggle File Explorer (nvim-tree)' })
     end,
   },
 
@@ -912,7 +917,6 @@ require('lazy').setup({
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
-
   {
     'stevearc/aerial.nvim',
     opts = {},
