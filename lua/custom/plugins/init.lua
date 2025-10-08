@@ -9,12 +9,6 @@ require('conform').formatters.erbformat = {
   args = { '$FILENAME', '--write' },
 }
 
-vim.api.nvim_create_autocmd('VimEnter', {
-  callback = function()
-    vim.cmd 'NERDTreeToggle'
-  end,
-})
-
 vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
   pattern = { '*.tf.jinja' },
   command = 'set filetype=terraform',
