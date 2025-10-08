@@ -286,7 +286,10 @@ require('lazy').setup({
   -- Then, because we use the `config` key, the configuration only runs
   -- after the plugin has been loaded:
   --  config = function() ... end
-
+  {
+    'towolf/vim-helm',
+    ft = { 'helm' }, -- optional: load only for helm files
+  },
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
@@ -342,6 +345,7 @@ require('lazy').setup({
         -- custom mappings
         vim.keymap.set('n', 'gi', api.node.open.horizontal, opts 'Split Pane (Horizontal) THOMAS')
         vim.keymap.set('n', 'gs', api.node.open.vertical, opts 'Split Pane (Vertical) THOMAS')
+        vim.keymap.set('n', '<leader>n', '<Cmd>NvimTreeToggle<CR>', { desc = 'Toggle NvimTree' })
       end
 
       require('nvim-tree').setup {
@@ -468,7 +472,6 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -656,7 +659,24 @@ require('lazy').setup({
         terraformls = {},
         tflint = {},
         pyright = {},
-        yamlls = {},
+        yamlls = {
+          filetypes = { 'yaml' },
+          on_attach = function(client, bufnr)
+            -- Detect Helm context and kill yamlls immediately
+            local path = vim.api.nvim_buf_get_name(bufnr)
+            local in_templates = path:match '/templates/' ~= nil
+            local in_chart = (vim.fs.find('Chart.yaml', { upward = true, path = path })[1] ~= nil)
+            local flagged = vim.b[bufnr].is_helm_template == true
+
+            if in_templates or in_chart or flagged then
+              -- stop yamlls and silence diagnostics for this buffer
+              client.stop()
+              vim.diagnostic.disable(bufnr)
+              return
+            end
+          end,
+        },
+        helm_ls = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -893,33 +913,6 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
-  -- NERDTree plugin
-  {
-    'preservim/nerdtree',
-    cmd = { 'NERDTreeToggle', 'NERDTreeFind' },
-    keys = {
-      { '<C-n>', ':NERDTreeToggle<CR>', desc = 'Toggle NERDTree' },
-      { '<C-t>', ':NERDTreeTabsToggle<CR>', desc = 'Toggle NERDTree Tabs' },
-    },
-    config = function()
-      -- NERDTree specific settings
-      vim.g.NERDTreeShowHidden = 1 -- Show hidden files
-      vim.g.NERDTreeMinimalUI = 1 -- Enable minimal UI
-      vim.g.NERDTreeIgnore = { '\\.pyc$', '\\~$' } -- Ignore some file patterns
-
-      -- Automatically close NERDTree if it's the last window
-      vim.cmd [[
-        autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-      ]]
-    end,
-  },
-
-  -- NERDTree Tabs plugin
-  {
-    'jistr/vim-nerdtree-tabs',
-    cmd = { 'NERDTreeTabsToggle' },
-    lazy = true,
-  },
   {
     'stevearc/aerial.nvim',
     opts = {},
@@ -969,6 +962,23 @@ require('lazy').setup({
   {
     'trixnz/sops.nvim',
     lazy = false,
+  },
+  {
+    'f-person/git-blame.nvim',
+    -- load the plugin at startup
+    event = 'VeryLazy',
+    -- Because of the keys part, you will be lazy loading this plugin.
+    -- The plugin will only load once one of the keys is used.
+    -- If you want to load the plugin at startup, add something like event = "VeryLazy",
+    -- or lazy = false. One of both options will work.
+    opts = {
+      -- your configuration comes here
+      -- for example
+      enabled = true, -- if you want to enable the plugin
+      message_template = ' <summary> • <date> • <author> • <<sha>>', -- template for the blame message, check the Message template section for more options
+      date_format = '%m-%d-%Y %H:%M:%S', -- template for the date, check Date format section for more options
+      virtual_text_column = 1, -- virtual text start column, check Start virtual text at column section for more options
+    },
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
