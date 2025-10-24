@@ -394,6 +394,9 @@ require('lazy').setup({
 
       require('nvim-tree').setup {
         on_attach = my_on_attach,
+        filesystem_watchers = {
+          enable = true,
+        },
         actions = {
           open_file = {
             window_picker = {
