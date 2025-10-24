@@ -148,6 +148,13 @@ vim.opt.splitbelow = true
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'go',
+  callback = function()
+    vim.opt_local.list = false
+  end,
+})
+
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
@@ -201,6 +208,43 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.highlight.on_yank()
+  end,
+})
+
+-- [[ Custom Filetypes ]]
+-- Map files named exactly 'Packfile' to a custom filetype
+-- We'll keep Python syntax highlighting without attaching any LSP
+-- See `:help vim.filetype.add()`
+vim.filetype.add({
+  filename = {
+    ['Packfile'] = 'packfile',
+  },
+})
+
+-- Treesitter: treat 'packfile' filetype as Python for highlighting/indent
+do
+  local ok_lang, ts_lang = pcall(require, 'vim.treesitter.language')
+  if ok_lang and ts_lang and type(ts_lang.register) == 'function' then
+    pcall(ts_lang.register, 'python', 'packfile')
+  else
+    local ok_parsers, parsers = pcall(require, 'nvim-treesitter.parsers')
+    if ok_parsers and parsers and parsers.ft_to_lang then
+      parsers.ft_to_lang.packfile = 'python'
+    end
+  end
+end
+
+-- For the custom 'packfile' type: enable Python syntax and disable diagnostics
+local packfile_group = vim.api.nvim_create_augroup('packfile_no_lsp', { clear = true })
+vim.api.nvim_create_autocmd('FileType', {
+  group = packfile_group,
+  pattern = 'packfile',
+  callback = function(args)
+    local bufnr = args.buf
+    vim.b[bufnr].is_packfile = true
+    vim.diagnostic.disable(bufnr)
+    -- Keep familiar Python syntax highlighting without using Python LSP
+    pcall(vim.cmd, 'setlocal syntax=python')
   end,
 })
 
